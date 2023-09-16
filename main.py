@@ -1,3 +1,8 @@
+# Must install Python
+# Then pip install pygame
+#      pip install tk 
+#      pip install Pillow
+
 import os
 
 from tkinter import *
@@ -13,21 +18,15 @@ root = Tk()
 root.title("Music Player")
 root.geometry("920x600+290+85")
 root.configure(background='#212121')
-mixer.init()
+mixer.init()    
 
+# Create a function to select a music directory
+def SelectFolder():
+    # Asks the user to select a directory
+    filepath = filedialog.askdirectory(initialdir=r"C:\Users\vince\VS Code\Better_MP3_Player", title="Dialog Box")
 
-label = Label(root, text="Testing")
-label.pack(side = BOTTOM)
-
-# Create a function to open a file
-def AddMusic():
-    path = filedialog.askdirectory()
-    if path:
-        os.chdir(path)
-        songs = os.listdir(path)
-        for song in songs:
-            if song.endswith(".mp3"):
-                Playlist.insert(END, song)
+    # Displays the appropriate directory
+    Label(root, text = filepath).place(x=50, y=700)
 
 def PlayMusic():
     Music_Name = Playlist.get(ACTIVE)
@@ -49,10 +48,10 @@ spotify_widelogo = ImageTk.PhotoImage(wide_logo)
 Label(root, image = spotify_widelogo).pack(anchor = "n", side = "left")
 
 # Initializing the pictures for the buttons
-add = Image.open(r"Images/add_button.png")
-add = add.resize((200,200))
-button_Add = ImageTk.PhotoImage(add)    
-Button(root, image=button_Add, bg="#0f1a2b",bd=0, command=PlayMusic).place(x=100, y=500)
+file_image = Image.open(r"Images/file_logo.png")
+file_image = file_image.resize((200,200))
+button_Add = ImageTk.PhotoImage(file_image)    
+Button(root, image=button_Add, bg="#0f1a2b",bd=0, command=SelectFolder).place(x=50, y=500)
 
 
 button_Resume = PhotoImage(file="Images/resume_button.png")
