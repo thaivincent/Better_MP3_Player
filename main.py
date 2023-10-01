@@ -20,7 +20,7 @@ root.geometry("1150x650+290+85")
 root.configure(background='#212121')
 mixer.init()
 
-global current_playing_song
+global current_playing_song # Represents the INDEX of the current playing song
 current_playing_song = -1
 
 # Create a function to select a music directory
@@ -39,6 +39,7 @@ def SelectFolder():
     # Loop through the elements in the list to add them to the listbox
     song_list = os.listdir(folder_path)
     index = 0
+    global songnum
     songnum = 0
     for i in song_list:
         if i[-4:] == ".mp3":
@@ -64,7 +65,35 @@ def PlayMusic():
         current_playing_song = -1
         play_pause_button.config(image=spotify_play_image)
         
- 
+def NextSong():
+    global current_playing_song
+    if current_playing_song + 1 < songnum:
+        song_file = song_listbox.get(current_playing_song + 1)
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
+        current_playing_song += 1
+    elif current_playing_song + 1 == songnum:
+        song_file = song_listbox.get(0)
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
+        current_playing_song = 0
+
+def PrevSong():
+    global current_playing_song
+    if current_playing_song > 0:
+        song_file = song_listbox.get(current_playing_song - 1)
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
+        current_playing_song -= 1
+    elif current_playing_song == 0:
+        song_file = song_listbox.get(songnum - 1)
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
+        current_playing_song = songnum - 1
     
 # Sets the Icon photo
 spotify_iconlogo = PhotoImage(file="Images/spotify_logo.png")
@@ -82,9 +111,9 @@ Label(root, image = spotify_widelogo).pack(anchor = "n", side = "left")
 
 # Initializing the pictures for the buttons
 button_resume = PhotoImage(file="Images/resume_button.png")
-
-
 button_pause = PhotoImage(file="Images/pause_button.png")
+prev_image = PhotoImage(file="Images/prev_button.png")
+next_image = PhotoImage(file="Images/next_button.png")
 
 #Placing the File Button
 file_image = Image.open(r"Images/file_logo.png")
@@ -92,7 +121,7 @@ file_image = file_image.resize((200,200))
 button_file = ImageTk.PhotoImage(file_image)    
 Button(root, image=button_file, bg="#0f1a2b",bd=0, command = SelectFolder).place(x=50, y=350)
 
-# Place the play music button
+# Placing the play/pause music button
 play_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\resume_button.png")
 play_image = play_image.resize((100,100))
 spotify_play_image = ImageTk.PhotoImage(play_image)
@@ -103,13 +132,20 @@ spotify_pause_image = ImageTk.PhotoImage(pause_image)
 
 global play_pause_button
 play_pause_button = Button(root, image = spotify_play_image, command = PlayMusic)
-play_pause_button.place(x=700, y = 450)
+play_pause_button.place(x=700, y=450)
 
-# Placing the song count
+# Displaying the song count
 global songcount
 songcount = StringVar(value="0")
 Label(root, text="Song Count: ").place(x=540, y=10)
 Label(root, textvariable=songcount).place(x=620, y=10)
+
+# Placing the Next and Prev Buttons
+prev_button = Button(root, image=prev_image,command=PrevSong)
+prev_button.place(x=540, y=450)
+
+next_button = Button(root, image=next_image,command=NextSong)
+next_button.place(x=810,y=450)
 
 
 
