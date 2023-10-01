@@ -20,6 +20,9 @@ root.geometry("1150x650+290+85")
 root.configure(background='#212121')
 mixer.init()
 
+global music_status
+music_status = 1
+
 # Create a function to select a music directory
 def SelectFolder():
     # Asks the user to select a directory
@@ -47,11 +50,24 @@ def SelectFolder():
 
 
 def PlayMusic():
-    for i in song_listbox.curselection():
-        song_file = song_listbox.get(i)
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
+    global music_status
+    global current_song_index
+    if music_status == 1:
+        for i in song_listbox.curselection():
+            song_file = song_listbox.get(i)
+            play_file = os.path.join(folder_path,song_file)
+            mixer.music.load(play_file)
+            mixer.music.play()
+        music_status = 0
+        play_pause_button.config(image=spotify_pause_image)   
+
+    elif music_status == 1 and 
+    else:
+        mixer.music.pause()
+        music_status = 1
+        play_pause_button.config(image=spotify_play_image)
+        
+ 
     
 # Sets the Icon photo
 spotify_iconlogo = PhotoImage(file="Images/spotify_logo.png")
@@ -65,22 +81,32 @@ wide_logo = wide_logo.resize((400,225))
 spotify_widelogo = ImageTk.PhotoImage(wide_logo)
 Label(root, image = spotify_widelogo).pack(anchor = "n", side = "left")
 
-# Initializing the pictures for the buttons
-button_Resume = PhotoImage(file="Images/resume_button.png")
-button_Pause = PhotoImage(file="Images/pause_button.png")
 
+
+# Initializing the pictures for the buttons
+button_resume = PhotoImage(file="Images/resume_button.png")
+
+
+button_pause = PhotoImage(file="Images/pause_button.png")
 
 #Placing the File Button
 file_image = Image.open(r"Images/file_logo.png")
 file_image = file_image.resize((200,200))
-button_File = ImageTk.PhotoImage(file_image)    
-Button(root, image=button_File, bg="#0f1a2b",bd=0, command = SelectFolder).place(x=50, y=350)
+button_file = ImageTk.PhotoImage(file_image)    
+Button(root, image=button_file, bg="#0f1a2b",bd=0, command = SelectFolder).place(x=50, y=350)
 
 # Place the play music button
 play_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\resume_button.png")
 play_image = play_image.resize((100,100))
 spotify_play_image = ImageTk.PhotoImage(play_image)
-Button(root, image = spotify_play_image, command = PlayMusic).place(x=700, y = 450)
+
+pause_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\pause_button.png")
+pause_image = pause_image.resize((100,100))
+spotify_pause_image = ImageTk.PhotoImage(pause_image)
+
+global play_pause_button
+play_pause_button = Button(root, image = spotify_play_image, command = PlayMusic)
+play_pause_button.place(x=700, y = 450)
 
 # Placing the song count
 global songcount
