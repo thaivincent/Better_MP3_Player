@@ -18,6 +18,7 @@ root = Tk()
 root.title("Music Player")
 root.geometry("1150x650+290+85")
 root.configure(background='#212121')
+root.resizable(0,0)
 mixer.init()
 
 global current_playing_song # Represents the INDEX of the current playing song
@@ -32,9 +33,7 @@ def SelectFolder():
     # Displays the appropriate directory
     Label(root, text = folder_path).place(x=50, y=700)
 
-    #Initialize a listbox
-    global song_listbox
-    song_listbox = Listbox(root, height= 20, width = 100, selectmode=SINGLE)
+    song_listbox.delete(0,END)
 
     # Loop through the elements in the list to add them to the listbox
     song_list = os.listdir(folder_path)
@@ -47,12 +46,16 @@ def SelectFolder():
             song_listbox.insert(index,i)
             index += 1
     songcount.set(songnum)
-    song_listbox.place(x = 450, y = 50)   
+    song_listbox.place(x = 450, y = 50) 
 
 
 def PlayMusic():
     global current_playing_song
-    current_curse_selection = song_listbox.curselection()[0] 
+    if len(song_listbox.curselection()) == 0:
+        print("No song selected")
+        return()
+    current_curse_selection = song_listbox.curselection()[0]
+
     if current_playing_song == -1 or current_playing_song != current_curse_selection:
         song_file = song_listbox.get(song_listbox.curselection())
         play_file = os.path.join(folder_path,song_file)
@@ -67,18 +70,23 @@ def PlayMusic():
         
 def NextSong():
     global current_playing_song
-    if current_playing_song + 1 < songnum:
-        song_file = song_listbox.get(current_playing_song + 1)
+    songcurrent = current_playing_song + 1
+    if songcurrent < songnum:
+        song_file = song_listbox.get(songcurrent)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
         current_playing_song += 1
-    elif current_playing_song + 1 == songnum:
+        song_listbox.select_clear(0,END)
+        song_listbox.selection_set(current_playing_song)
+    elif songcurrent == songnum:
         song_file = song_listbox.get(0)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
         current_playing_song = 0
+        song_listbox.select_clear(0,END)
+        song_listbox.selection_set(current_playing_song)
 
 def PrevSong():
     global current_playing_song
@@ -88,12 +96,23 @@ def PrevSong():
         mixer.music.load(play_file)
         mixer.music.play()
         current_playing_song -= 1
+        song_listbox.select_clear(0,END)
+        song_listbox.selection_set(current_playing_song)
     elif current_playing_song == 0:
         song_file = song_listbox.get(songnum - 1)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
         current_playing_song = songnum - 1
+        song_listbox.select_clear(0,END)
+        song_listbox.selection_set(current_playing_song)
+
+def SelectChange(event):
+    play_pause_button.config(image=spotify_play_image)
+
+def Debug():
+    print("Current Playing Song:", current_playing_song)
+    print("Song Selection:", song_listbox.curselection())
     
 # Sets the Icon photo
 spotify_iconlogo = PhotoImage(file="Images/spotify_logo.png")
@@ -147,9 +166,12 @@ prev_button.place(x=540, y=450)
 next_button = Button(root, image=next_image,command=NextSong)
 next_button.place(x=810,y=450)
 
+Button(root,text="Debug",command=Debug).pack()
 
+# Initializing the songlist
+song_listbox = Listbox(root, height= 20, width = 100, selectmode=SINGLE)
+song_listbox.bind("<<ListboxSelect>>", SelectChange) 
 
-root.resizable(0,0)
 # Runs the application
 root.mainloop()
 
