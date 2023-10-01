@@ -49,10 +49,10 @@ def SelectFolder():
 def PlayMusic():
     for i in song_listbox.curselection():
         song_file = song_listbox.get(i)
-        mixer.music.load(folder_path + "/" + song_file)
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
     
-
-
 # Sets the Icon photo
 spotify_iconlogo = PhotoImage(file="Images/spotify_logo.png")
 root.iconphoto(False, spotify_iconlogo)
@@ -80,13 +80,15 @@ Button(root, image=button_File, bg="#0f1a2b",bd=0, command = SelectFolder).place
 play_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\resume_button.png")
 play_image = play_image.resize((100,100))
 spotify_play_image = ImageTk.PhotoImage(play_image)
-Button(root, image = spotify_play_image, command = PlayMusic).place(x=460, y = 450)
+Button(root, image = spotify_play_image, command = PlayMusic).place(x=700, y = 450)
 
-#Placing the song count
+# Placing the song count
 global songcount
 songcount = StringVar(value="0")
 Label(root, text="Song Count: ").place(x=540, y=10)
 Label(root, textvariable=songcount).place(x=620, y=10)
+
+
 
 root.resizable(0,0)
 # Runs the application
