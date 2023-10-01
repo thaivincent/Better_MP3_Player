@@ -16,7 +16,7 @@ from PIL import Image, ImageTk
 # Initalize window for the music player
 root = Tk()
 root.title("Music Player")
-root.geometry("920x600+290+85")
+root.geometry("1150x650+290+85")
 root.configure(background='#212121')
 mixer.init()
 
@@ -36,10 +36,13 @@ def SelectFolder():
     # Loop through the elements in the list to add them to the listbox
     song_list = os.listdir(folder_path)
     index = 0
+    songnum = 0
     for i in song_list:
-        song_listbox.insert(index,i)
-        index += 1
-
+        if i[-4:] == ".mp3":
+            songnum += 1
+            song_listbox.insert(index,i)
+            index += 1
+    songcount.set(songnum)
     song_listbox.place(x = 450, y = 50)   
 
 
@@ -47,8 +50,7 @@ def PlayMusic():
     for i in song_listbox.curselection():
         song_file = song_listbox.get(i)
         mixer.music.load(folder_path + "/" + song_file)
-        
-
+    
 
 
 # Sets the Icon photo
@@ -64,24 +66,29 @@ spotify_widelogo = ImageTk.PhotoImage(wide_logo)
 Label(root, image = spotify_widelogo).pack(anchor = "n", side = "left")
 
 # Initializing the pictures for the buttons
-file_image = Image.open(r"Images/file_logo.png")
-file_image = file_image.resize((200,200))
-button_File = ImageTk.PhotoImage(file_image)    
-Button(root, image=button_File, bg="#0f1a2b",bd=0, command = SelectFolder).place(x=50, y=500)
-
 button_Resume = PhotoImage(file="Images/resume_button.png")
-
 button_Pause = PhotoImage(file="Images/pause_button.png")
 
 
-# Place the play music button
+#Placing the File Button
+file_image = Image.open(r"Images/file_logo.png")
+file_image = file_image.resize((200,200))
+button_File = ImageTk.PhotoImage(file_image)    
+Button(root, image=button_File, bg="#0f1a2b",bd=0, command = SelectFolder).place(x=50, y=350)
 
+# Place the play music button
 play_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\resume_button.png")
 play_image = play_image.resize((100,100))
 spotify_play_image = ImageTk.PhotoImage(play_image)
-Button(root, image = spotify_play_image, command = PlayMusic).place(x=460, y = 550)
+Button(root, image = spotify_play_image, command = PlayMusic).place(x=460, y = 450)
 
+#Placing the song count
+global songcount
+songcount = StringVar(value="0")
+Label(root, text="Song Count: ").place(x=540, y=10)
+Label(root, textvariable=songcount).place(x=620, y=10)
 
+root.resizable(0,0)
 # Runs the application
 root.mainloop()
 
