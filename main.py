@@ -20,8 +20,8 @@ root.geometry("1150x650+290+85")
 root.configure(background='#212121')
 mixer.init()
 
-global music_status
-music_status = 1
+global current_playing_song
+current_playing_song = -1
 
 # Create a function to select a music directory
 def SelectFolder():
@@ -50,21 +50,18 @@ def SelectFolder():
 
 
 def PlayMusic():
-    global music_status
-    global current_song_index
-    if music_status == 1:
-        for i in song_listbox.curselection():
-            song_file = song_listbox.get(i)
-            play_file = os.path.join(folder_path,song_file)
-            mixer.music.load(play_file)
-            mixer.music.play()
-        music_status = 0
-        play_pause_button.config(image=spotify_pause_image)   
-
-    elif music_status == 1 and 
+    global current_playing_song
+    current_curse_selection = song_listbox.curselection()[0] 
+    if current_playing_song == -1 or current_playing_song != current_curse_selection:
+        song_file = song_listbox.get(song_listbox.curselection())
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
+        play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
+        current_playing_song = song_listbox.curselection()[0] # Updating current song selection  
     else:
         mixer.music.pause()
-        music_status = 1
+        current_playing_song = -1
         play_pause_button.config(image=spotify_play_image)
         
  
