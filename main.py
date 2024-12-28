@@ -21,8 +21,12 @@ root.configure(background='#212121')
 root.resizable(0,0)
 mixer.init()
 
-global current_playing_song # Represents the INDEX of the current playing song
+# GLOBAL Variables
+# Represents the INDEX of the current playing song
 current_playing_song = -1
+last_playing_song = -1
+paused = True
+
 
 # Create a function to select a music directory
 def SelectFolder():
@@ -36,6 +40,7 @@ def SelectFolder():
     song_listbox.delete(0,END)
 
     # Loop through the elements in the list to add them to the listbox
+    # The list box is the element inside the interface which displays the list of songs 
     song_list = os.listdir(folder_path)
     index = 0
     global songnum
@@ -51,25 +56,68 @@ def SelectFolder():
 
 def PlayMusic():
     global current_playing_song
-    if len(song_listbox.curselection()) == 0:
-        print("No song selected")
-        return()
-    current_curse_selection = song_listbox.curselection()[0]
-
-    if current_playing_song == -1 or current_playing_song != current_curse_selection:
+    global last_playing_song
+    global paused
+  
+    #Plays highlighed Song in the list box
+    def playSelectedSong():
+        global current_playing_song
         song_file = song_listbox.get(song_listbox.curselection())
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
         play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-        current_playing_song = song_listbox.curselection()[0] # Updating current song selection  
-    else:
+        current_playing_song = song_listbox.curselection()[0] # Updating current song selection
+
+    #Plays song at selected index in the listbox
+    def PlaySong(index):
+        global current_playing_song
+        song_file = song_listbox.get(index)
+        play_file = os.path.join(folder_path,song_file)
+        mixer.music.load(play_file)
+        mixer.music.play()
+        play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
+        current_playing_song = index # Updating current song selection        
+
+
+
+    if len(song_listbox.curselection()) == 0:
+        print("No song selected")
+        return()
+    current_curse_selection = song_listbox.curselection()[0]
+    
+    if paused:
+        #If the current song is being unpaused
+        if last_playing_song == current_curse_selection:
+            mixer.music.unpause()
+            paused = False
+            play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
+            current_playing_song = song_listbox.curselection()[0] # Updating current song selection
+
+            print("current song being unpaused")
+            print(current_curse_selection, current_playing_song)
+        #If there is no song currently playing or a different is selected
+
+        elif current_playing_song != current_curse_selection:
+            playSelectedSong()
+            paused = False
+            last_playing_song = current_playing_song
+            print("change to different song")
+            print(current_curse_selection, current_playing_song)
+
+    elif not paused :
+        print("music paused")
+        paused = True
         mixer.music.pause()
+        last_playing_song = current_playing_song
         current_playing_song = -1
         play_pause_button.config(image=spotify_play_image)
         
+            
+
 def NextSong():
     global current_playing_song
+
     songcurrent = current_playing_song + 1
     if songcurrent < songnum:
         song_file = song_listbox.get(songcurrent)
@@ -127,7 +175,6 @@ spotify_widelogo = ImageTk.PhotoImage(wide_logo)
 Label(root, image = spotify_widelogo).pack(anchor = "n", side = "left")
 
 
-
 # Initializing the pictures for the buttons
 button_resume = PhotoImage(file="Images/resume_button.png")
 button_pause = PhotoImage(file="Images/pause_button.png")
@@ -141,11 +188,11 @@ button_file = ImageTk.PhotoImage(file_image)
 Button(root, image=button_file, bg="#0f1a2b",bd=0, command = SelectFolder).place(x=50, y=350)
 
 # Placing the play/pause music button
-play_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\resume_button.png")
+play_image = Image.open(r"Images\resume_button.png")
 play_image = play_image.resize((100,100))
 spotify_play_image = ImageTk.PhotoImage(play_image)
 
-pause_image = Image.open(r"C:\Users\vince\VS Code\Better_MP3_Player\Images\pause_button.png")
+pause_image = Image.open(r"Images\pause_button.png")
 pause_image = pause_image.resize((100,100))
 spotify_pause_image = ImageTk.PhotoImage(pause_image)
 
