@@ -6,7 +6,7 @@
 import os
 
 from tkinter import *
-from tkinter import Tk
+from tkinter import ttk
 from tkinter import filedialog
 
 from pygame import mixer
@@ -105,7 +105,7 @@ def PlayMusic():
             print("change to different song")
             print(current_curse_selection, current_playing_song)
 
-    elif not paused :
+    elif not paused:
         print("music paused")
         paused = True
         mixer.music.pause()
@@ -113,7 +113,10 @@ def PlayMusic():
         current_playing_song = -1
         play_pause_button.config(image=spotify_play_image)
         
-            
+algorithms = ["True Random", "Random No Repeats", "No Shuffle" ]   
+combo = ttk.Combobox(state = "readonly", values = algorithms)
+combo.place(x=340,y=550)
+combo.set("No Shuffle")
 
 def NextSong():
     global current_playing_song
@@ -170,7 +173,7 @@ root.iconphoto(False, spotify_iconlogo)
 wide_logo = Image.open(r"Images/spotify_logo_wide.png")
 
 # Resizes, and sets the banner photo
-wide_logo = wide_logo.resize((400,225))
+wide_logo = wide_logo.resize((200,115))
 spotify_widelogo = ImageTk.PhotoImage(wide_logo)
 Label(root, image = spotify_widelogo).pack(anchor = "n", side = "left")
 
