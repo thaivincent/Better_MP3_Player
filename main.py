@@ -22,10 +22,9 @@ root.resizable(0,0)
 mixer.init()
 
 # GLOBAL Variables
-# Represents the INDEX of the current playing song
-current_playing_song = -1
-last_playing_song = -1
 paused = True
+#A stack of all of the indexes of songs played so far.
+song_history = [-1]
 
 
 # Create a function to select a music directory
@@ -46,6 +45,7 @@ def SelectFolder():
     global songnum
     songnum = 0
     for i in song_list:
+        #if the file extension is .mp3
         if i[-4:] == ".mp3":
             songnum += 1
             song_listbox.insert(index,i)
@@ -55,30 +55,25 @@ def SelectFolder():
 
 
 def PlayMusic():
-    global current_playing_song
-    global last_playing_song
     global paused
   
     #Plays highlighed Song in the list box
     def playSelectedSong():
-        global current_playing_song
         song_file = song_listbox.get(song_listbox.curselection())
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
         play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-        current_playing_song = song_listbox.curselection()[0] # Updating current song selection
+        song_history.append(song_listbox.curselection()[0])
 
     #Plays song at selected index in the listbox
-    def PlaySong(index):
-        global current_playing_song
+    def playSong(index):
         song_file = song_listbox.get(index)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
         play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-        current_playing_song = index # Updating current song selection        
-
+        song_history.append(index) # Updating current song selection        
 
 
     if len(song_listbox.curselection()) == 0:
@@ -88,29 +83,23 @@ def PlayMusic():
     
     if paused:
         #If the current song is being unpaused
-        if last_playing_song == current_curse_selection:
+        if song_history[-1] == current_curse_selection:
             mixer.music.unpause()
-            paused = False
+            song_history.pop()
             play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-            current_playing_song = song_listbox.curselection()[0] # Updating current song selection
-
             print("current song being unpaused")
-            print(current_curse_selection, current_playing_song)
         #If there is no song currently playing or a different is selected
-
-        elif current_playing_song != current_curse_selection:
-            playSelectedSong()
-            paused = False
-            last_playing_song = current_playing_song
+        elif song_history[-1] != current_curse_selection:
+            playSong(current_curse_selection)
+            song_history.append(current_curse_selection)
             print("change to different song")
-            print(current_curse_selection, current_playing_song)
+        paused = False
 
+    #If play/Pause button is hit, and music is currently playing, it will pause the music.
     elif not paused:
         print("music paused")
         paused = True
         mixer.music.pause()
-        last_playing_song = current_playing_song
-        current_playing_song = -1
         play_pause_button.config(image=spotify_play_image)
         
 algorithms = ["True Random", "Random No Repeats", "No Shuffle" ]   
@@ -119,50 +108,62 @@ combo.place(x=340,y=550)
 combo.set("No Shuffle")
 
 def NextSong():
-    global current_playing_song
 
-    songcurrent = current_playing_song + 1
+    songcurrent = song_history[-1] + 1
     if songcurrent < songnum:
         song_file = song_listbox.get(songcurrent)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
-        current_playing_song += 1
+
+        song_history.append(song_history[-1] + 1)
+
+        #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
-        song_listbox.selection_set(current_playing_song)
+        song_listbox.selection_set(song_history[-1])
+    
+    #If we reached the end of the list, we want to loop back to the beginning.
     elif songcurrent == songnum:
         song_file = song_listbox.get(0)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
-        current_playing_song = 0
+
+        song_history.append(0)
+
+        #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
-        song_listbox.selection_set(current_playing_song)
+        song_listbox.selection_set(song_history[-1])
 
 def PrevSong():
-    global current_playing_song
-    if current_playing_song > 0:
-        song_file = song_listbox.get(current_playing_song - 1)
+    if song_history[-1] > 0:
+        song_file = song_listbox.get(song_history[-1] - 1)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
-        current_playing_song -= 1
+
+        song_history.append(song_history[-1] - 1)
+
+        #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
-        song_listbox.selection_set(current_playing_song)
-    elif current_playing_song == 0:
+        song_listbox.selection_set(song_history[-1])
+    elif song_history[-1] == 0:
         song_file = song_listbox.get(songnum - 1)
         play_file = os.path.join(folder_path,song_file)
         mixer.music.load(play_file)
         mixer.music.play()
-        current_playing_song = songnum - 1
+
+        song_history.append(songnum - 1)
+
+        #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
-        song_listbox.selection_set(current_playing_song)
+        song_listbox.selection_set(song_history[-1])
 
 def SelectChange(event):
     play_pause_button.config(image=spotify_play_image)
 
 def Debug():
-    print("Current Playing Song:", current_playing_song)
+    print("Current Playing Song:", song_history[-1])
     print("Song Selection:", song_listbox.curselection())
     
 # Sets the Icon photo
