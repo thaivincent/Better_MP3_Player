@@ -70,22 +70,25 @@ def PlayMusic():
         return()
     current_curse_selection = song_listbox.curselection()[0]
     
-    if paused:
-        #If the current song is being unpaused
-        if song_history[-1] == current_curse_selection:
-            mixer.music.unpause()
-            song_history.pop()
-            play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-            print("current song being unpaused")
-        #If there is no song currently playing or a different is selected
-        elif song_history[-1] != current_curse_selection:
-            playSong(current_curse_selection)
-            song_history.append(current_curse_selection)
-            print("change to different song")
-        paused = False
+    print(song_history)
+    print(current_curse_selection)
 
-    #If play/Pause button is hit, and music is currently playing, it will pause the music.
-    elif not paused:
+
+    #If the current song is being unpaused
+    if song_history[-1] == current_curse_selection:
+        mixer.music.unpause()
+        song_history.pop()
+        play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
+        print("current song being unpaused")
+    #If there is no song currently playing or a different is selected
+    elif song_history[-1] != current_curse_selection:
+        playSong(current_curse_selection)
+        song_history.append(current_curse_selection)
+        print("change to different song")
+
+
+        #If play/Pause button is hit, and music is currently playing, it will pause the music.
+    elif song_history[-1] == current_curse_selection and not paused:
         print("music paused")
         paused = True
         mixer.music.pause()
