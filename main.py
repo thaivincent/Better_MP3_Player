@@ -54,27 +54,16 @@ def SelectFolder():
     song_listbox.place(x = 450, y = 50) 
 
 
+#Plays song at selected index in the listbox
+def playSong(index):
+    song_file = song_listbox.get(index)
+    play_file = os.path.join(folder_path,song_file)
+    mixer.music.load(play_file)
+    mixer.music.play()
+    play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
+
 def PlayMusic():
     global paused
-  
-    #Plays highlighed Song in the list box
-    def playSelectedSong():
-        song_file = song_listbox.get(song_listbox.curselection())
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
-        play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-        song_history.append(song_listbox.curselection()[0])
-
-    #Plays song at selected index in the listbox
-    def playSong(index):
-        song_file = song_listbox.get(index)
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
-        play_pause_button.config(image=spotify_pause_image) # Updating the Play/Pause button
-        song_history.append(index) # Updating current song selection        
-
 
     if len(song_listbox.curselection()) == 0:
         print("No song selected")
@@ -108,56 +97,38 @@ combo.place(x=340,y=550)
 combo.set("No Shuffle")
 
 def NextSong():
+    next_song_index = song_history[-1] + 1
 
-    songcurrent = song_history[-1] + 1
-    if songcurrent < songnum:
-        song_file = song_listbox.get(songcurrent)
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
+    # If song history is empty, play the first song in the list
 
+    if next_song_index < songnum:
         song_history.append(song_history[-1] + 1)
-
+        playSong(next_song_index)
         #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
         song_listbox.selection_set(song_history[-1])
     
     #If we reached the end of the list, we want to loop back to the beginning.
-    elif songcurrent == songnum:
-        song_file = song_listbox.get(0)
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
-
+    elif next_song_index == songnum:
+        playSong(0)
         song_history.append(0)
 
         #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
         song_listbox.selection_set(song_history[-1])
+    
+    print(song_history)
 
 def PrevSong():
-    if song_history[-1] > 0:
-        song_file = song_listbox.get(song_history[-1] - 1)
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
-
-        song_history.append(song_history[-1] - 1)
+    #Only pops the stack if it is non-empty
+    if song_history[-1] != -1:
+        prev_song = song_history.pop()
+        playSong(prev_song)
 
         #Highlights the next song in the list since we are moving tracks
         song_listbox.select_clear(0,END)
-        song_listbox.selection_set(song_history[-1])
-    elif song_history[-1] == 0:
-        song_file = song_listbox.get(songnum - 1)
-        play_file = os.path.join(folder_path,song_file)
-        mixer.music.load(play_file)
-        mixer.music.play()
-
-        song_history.append(songnum - 1)
-
-        #Highlights the next song in the list since we are moving tracks
-        song_listbox.select_clear(0,END)
-        song_listbox.selection_set(song_history[-1])
+        song_listbox.selection_set(prev_song)
+    print(song_history)
 
 def SelectChange(event):
     play_pause_button.config(image=spotify_play_image)
@@ -217,6 +188,7 @@ prev_button.place(x=540, y=450)
 next_button = Button(root, image=next_image,command=NextSong)
 next_button.place(x=810,y=450)
 
+#placing the debug
 Button(root,text="Debug",command=Debug).pack()
 
 # Initializing the songlist
